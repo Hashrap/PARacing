@@ -19,6 +19,7 @@ public class Kart : MonoBehaviour {
     public float acceleration;
     public Vector3 accelerationPos;
     public float reversePenaltyMultiplier;
+    public float brakeForce;
 
     public float turnTorque;
     public float tractionMultiplier;
@@ -115,13 +116,18 @@ public class Kart : MonoBehaviour {
         //Brake/Reverse
         else if (Input.GetKey(KeyCode.S))
         {
+            float deceleration = acceleration;
+            if(transform.TransformVector(physics.velocity).z <= 0)
+                deceleration *= reversePenaltyMultiplier;
+            else
+                deceleration = brakeForce;
             //See above, but along the backwards (z-) axis
             physics.AddForceAtPosition(
                 //We do apply a penalty for being in reverse
                 //TODO: Fix: penalty currently applies to brakes as well!
                 //Assign braking and reversing their own public variables
                 //Add logic differentiating between braking and reversing
-                Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.back) * (acceleration * reversePenaltyMultiplier), avgNormal),
+                Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.back) * deceleration, avgNormal),
                 transform.TransformPoint(accelerationPos),
                 ForceMode.Acceleration);
         }

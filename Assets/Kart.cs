@@ -39,6 +39,7 @@ public class Kart : MonoBehaviour {
         Vector3[] contactPoints = new Vector3[wheels.Length];
         Vector3[] contactNormals = new Vector3[wheels.Length];
         float[] compressionRatios = new float[wheels.Length];
+        bool isGrounded = false;
 
         //Suspension
         //TODO: Finetune
@@ -48,7 +49,8 @@ public class Kart : MonoBehaviour {
             if (Physics.Raycast(transform.TransformPoint(wheels[i]),
                     transform.TransformDirection(Vector3.down),
                     out hit, suspensionMax))
-            {
+            {   
+                isGrounded= true;
                 //This info will help us accelerate later.  Store it away for now.
                 contactNormals[i] = hit.normal;
                 //Calculate how much the suspension for a wheel is compressed from 0 (lax) to 1 (bottomed out)
@@ -76,6 +78,8 @@ public class Kart : MonoBehaviour {
 
         }
 
+        if(isGrounded)
+        {
         //Acceleration/Braking
         //TODO: Disable in midair
         //TODO: add a max speed
@@ -157,6 +161,7 @@ public class Kart : MonoBehaviour {
             Vector3 pos = new Vector3(x, 0, z);
             physics.AddForceAtPosition(Vector3.up * 20, transform.TransformPoint(pos), ForceMode.Impulse);
         }
+      }
 	}
 
     private void Update()

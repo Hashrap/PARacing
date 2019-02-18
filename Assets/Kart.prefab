@@ -435,7 +435,7 @@ GameObject:
   - component: {fileID: 1249173403028867277}
   - component: {fileID: 1249173403028867276}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Kart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCam: {fileID: 0}
   camOffset: {x: 0, y: 5, z: 10}
-  centerOfMass: {x: 0, y: -0.3, z: 0}
+  centerOfMass: {x: 0, y: -0.2, z: 0}
   wheels:
   - {x: -0.5, y: -0.1, z: 0.5}
   - {x: 0.5, y: -0.1, z: 0.5}
@@ -485,11 +485,12 @@ MonoBehaviour:
   suspensionForce: 8
   suspensionMax: 0.33
   acceleration: 10
-  accelerationPos: {x: 0, y: -0.5, z: 0.4}
+  accelerationPos: {x: 0, y: -0.3, z: 0.25}
   reversePenaltyMultiplier: 0.5
+  brakeForce: 20
   turnTorque: 4
   tractionMultiplier: 4
-  maxAngularVelocity: 0.75
+  maxAngularVelocity: 1.5
 --- !u!65 &1249173403028867277
 BoxCollider:
   m_ObjectHideFlags: 0

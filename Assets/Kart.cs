@@ -26,8 +26,12 @@ public class Kart : MonoBehaviour {
     //TODO: Finetune this value - affects max turn speed
     public float maxAngularVelocity;
 
+    private string item;
+    public GameObject ramen;
+
 	// Use this for initialization
 	void Start () {
+        item = "Ramen";
         physics = GetComponent<Rigidbody>();
         physics.centerOfMass = centerOfMass;
         physics.maxAngularVelocity = maxAngularVelocity;
@@ -179,5 +183,15 @@ public class Kart : MonoBehaviour {
         camPos += transform.TransformDirection(Vector3.up) * camOffset.y;
         mainCam.transform.position = camPos;
         mainCam.transform.LookAt(transform.position);
+
+        if(Input.GetKeyDown(KeyCode.F) && !item.Equals("None"))
+        {
+            if (item.Equals("Ramen"))
+            {
+                GameObject tmp = (GameObject)Instantiate(ramen, transform.position, transform.rotation);
+                Targeted t = tmp.GetComponent<Targeted>();
+                t.Target = this.transform;
+            }
+        }
     }
 }

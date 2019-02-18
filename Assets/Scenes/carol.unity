@@ -214,7 +214,7 @@ PrefabInstance:
     - target: {fileID: 1249173403028867275, guid: c89cf95f14fb24ae7b9cda95d45f6adb,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 54.22
+      value: 54.306
       objectReference: {fileID: 0}
     - target: {fileID: 1249173403028867275, guid: c89cf95f14fb24ae7b9cda95d45f6adb,
         type: 3}
@@ -291,6 +291,12 @@ PrefabInstance:
       propertyPath: brakeForce
       value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 1249173403028867274, guid: c89cf95f14fb24ae7b9cda95d45f6adb,
+        type: 3}
+      propertyPath: ramen
+      value: 
+      objectReference: {fileID: 401141631259364936, guid: 5254488ec591544e9aeb0ca67ba3d1e4,
+        type: 3}
     - target: {fileID: 1249173402482039233, guid: c89cf95f14fb24ae7b9cda95d45f6adb,
         type: 3}
       propertyPath: m_LocalPosition.x

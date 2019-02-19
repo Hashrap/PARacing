@@ -29,12 +29,14 @@ public class Kart : MonoBehaviour {
     private string item;
     public GameObject ramen;
     private float boost;
+    private float speedMultiplier;
 
 
 	// Use this for initialization
 	void Start () {
         boost = 0.0f;
-        item = "Ramen";
+        speedMultiplier = 1.0f;
+        item = "Boost";
         physics = GetComponent<Rigidbody>();
         physics.centerOfMass = centerOfMass;
         physics.maxAngularVelocity = maxAngularVelocity;
@@ -113,7 +115,7 @@ public class Kart : MonoBehaviour {
             {
                 physics.AddForceAtPosition(
                     //Project the kart's forward (z+) vector onto the average ground plane
-                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration, avgNormal),
+                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration * speedMultiplier, avgNormal),
                     //Force is applied slightly lower (y-) and moderately foreward (z+) of the center of volume
                     //This tilts the kart back and forth when accelerating and braking
                     transform.TransformPoint(accelerationPos),
@@ -161,19 +163,14 @@ public class Kart : MonoBehaviour {
             //Scale it down by some finetuned value each frame
             physics.AddRelativeForce(-xV * tractionMultiplier, 0, 0, ForceMode.Acceleration);
 
-            if (boost >= 0.0f)
-            {
-
-            }
-
             //Debug impulse
-            if(Input.GetKeyDown(KeyCode.Space))
+            /*if(Input.GetKeyDown(KeyCode.Space))
             {
                 x = Random.value - 0.5f;
                 z = Random.value - 0.5f;
                 Vector3 pos = new Vector3(x, 0, z);
                 physics.AddForceAtPosition(Vector3.up * 20, transform.TransformPoint(pos), ForceMode.Impulse);
-            }
+            }*/
         }
 	}
 
@@ -187,6 +184,11 @@ public class Kart : MonoBehaviour {
         mainCam.transform.position = camPos;
         mainCam.transform.LookAt(transform.position);
 
+        if (boost >= 0.0f)
+            boost -= Time.deltaTime;
+        else
+            speedMultiplier = 1.0f;
+
         if(Input.GetKeyDown(KeyCode.F) && !item.Equals("None"))
         {
             if (item.Equals("Ramen"))
@@ -198,6 +200,7 @@ public class Kart : MonoBehaviour {
 
             if(item.Equals("Boost"))
             {
+                speedMultiplier = 2.0f;
                 boost = 2.0f;
             }
         }

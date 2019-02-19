@@ -28,9 +28,12 @@ public class Kart : MonoBehaviour {
 
     private string item;
     public GameObject ramen;
+    private float boost;
+
 
 	// Use this for initialization
 	void Start () {
+        boost = 0.0f;
         item = "Ramen";
         physics = GetComponent<Rigidbody>();
         physics.centerOfMass = centerOfMass;
@@ -85,93 +88,93 @@ public class Kart : MonoBehaviour {
 
         if(isGrounded)
         {
-        //Acceleration/Braking
-        //TODO: Disable in midair
-        //TODO: add a max speed
-        //Maybe: Minimum speed
-        float x = 0, y = 0, z = 0;
+            //Acceleration/Braking
+            //TODO: Disable in midair
+            //TODO: add a max speed
+            //Maybe: Minimum speed
+            float x = 0, y = 0, z = 0;
 
-        //Average the surface normals of all wheel contact points
-        for (int i = 0; i < contactNormals.Length; i++)
-        {
-            x += contactNormals[i].x;
-            y += contactNormals[i].y;
-            z += contactNormals[i].z;
-        }
-        x /= contactNormals.Length;
-        y /= contactNormals.Length;
-        z /= contactNormals.Length;
+            //Average the surface normals of all wheel contact points
+            for (int i = 0; i < contactNormals.Length; i++)
+            {
+                x += contactNormals[i].x;
+                y += contactNormals[i].y;
+                z += contactNormals[i].z;
+            }
+            x /= contactNormals.Length;
+            y /= contactNormals.Length;
+            z /= contactNormals.Length;
 
-        //We will use this value to determine the direction force should be applied by the engine
-        Vector3 avgNormal = new Vector3(x, y, z);
+            //We will use this value to determine the direction force should be applied by the engine
+            Vector3 avgNormal = new Vector3(x, y, z);
 
-        //Accelerate/Brake
-        if(Input.GetKey(KeyCode.W))
-        {
-            physics.AddForceAtPosition(
-                //Project the kart's forward (z+) vector onto the average ground plane
-                Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration, avgNormal),
-                //Force is applied slightly lower (y-) and moderately foreward (z+) of the center of volume
-                //This tilts the kart back and forth when accelerating and braking
-                transform.TransformPoint(accelerationPos),
-                //Ignore mass
-                ForceMode.Acceleration);
-        }
-        //Brake/Reverse
-        else if (Input.GetKey(KeyCode.S))
-        {
-            float deceleration = acceleration;
-            if(transform.TransformVector(physics.velocity).z <= 0)
-                deceleration *= reversePenaltyMultiplier;
-            else
-                deceleration = brakeForce;
-            //See above, but along the backwards (z-) axis
-            physics.AddForceAtPosition(
-                //We do apply a penalty for being in reverse
-                //TODO: Fix: penalty currently applies to brakes as well!
-                //Assign braking and reversing their own public variables
-                //Add logic differentiating between braking and reversing
-                Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.back) * deceleration, avgNormal),
-                transform.TransformPoint(accelerationPos),
-                ForceMode.Acceleration);
-        }
+            //Accelerate/Brake
+            if(Input.GetKey(KeyCode.W))
+            {
+                physics.AddForceAtPosition(
+                    //Project the kart's forward (z+) vector onto the average ground plane
+                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration, avgNormal),
+                    //Force is applied slightly lower (y-) and moderately foreward (z+) of the center of volume
+                    //This tilts the kart back and forth when accelerating and braking
+                    transform.TransformPoint(accelerationPos),
+                    //Ignore mass
+                    ForceMode.Acceleration);
+            }
+            //Brake/Reverse
+            else if (Input.GetKey(KeyCode.S))
+            {
+                float deceleration = acceleration;
+                if(transform.TransformVector(physics.velocity).z <= 0)
+                    deceleration *= reversePenaltyMultiplier;
+                else
+                    deceleration = brakeForce;
+                //See above, but along the backwards (z-) axis
+                physics.AddForceAtPosition(
+                    //We do apply a penalty for being in reverse
+                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.back) * deceleration, avgNormal),
+                    transform.TransformPoint(accelerationPos),
+                    ForceMode.Acceleration);
+            }
 
-        //Turning
-        //TODO: finetune turn penalty at low speed
-        //TODO: make turning reversed when kart is going backwards
-        //TODO: disable in midair
-        //Left
-        if(Input.GetKey(KeyCode.A))
-        {
-            //Apply negative torque to the origin along the y axis (heading).  Scaled by velocity.
-            //TODO: Fix: Don't scale by vertical velocity!  Use just x and z, zero out y.
-            physics.AddRelativeTorque(0, -turnTorque * Mathf.Clamp01(physics.velocity.magnitude / 4), 0, ForceMode.Force);
-        }
-        //Right
-        else if(Input.GetKey(KeyCode.D))
-        {
-            //See above, but with positive torque
-            physics.AddRelativeTorque(0, turnTorque * Mathf.Clamp01(physics.velocity.magnitude / 4), 0, ForceMode.Force);
-        }
+            //Turning
+            //TODO: finetune turn penalty at low speed
+            //TODO: make turning reversed when kart is going backwards
+            //Left
+            if (Input.GetKey(KeyCode.A))
+            {
+                //Apply negative torque to the origin along the y axis (heading).  Scaled by velocity.
+                //TODO: Fix: Don't scale by vertical velocity!  Use just x and z, zero out y.
+                physics.AddRelativeTorque(0, -turnTorque * Mathf.Clamp01(physics.velocity.magnitude / 4), 0, ForceMode.Force);
+            }
+            //Right
+            else if(Input.GetKey(KeyCode.D))
+            {
+                //See above, but with positive torque
+                physics.AddRelativeTorque(0, turnTorque * Mathf.Clamp01(physics.velocity.magnitude / 4), 0, ForceMode.Force);
+            }
 
-        //Traction/skid
-        //TODO: finetune - reduce angular momentum further
-        //Maybe: Minimum angular velocity
-        //TODO: disable in midair
-        //Get the local sideways velocity
-        float xV = transform.InverseTransformVector(physics.velocity).x;
-        //Scale it down by some finetuned value each frame
-        physics.AddRelativeForce(-xV * tractionMultiplier, 0, 0, ForceMode.Acceleration);
+            //Traction/skid
+            //TODO: finetune - reduce angular momentum further
+            //Maybe: Minimum angular velocity
+            //Get the local sideways velocity
+            float xV = transform.InverseTransformVector(physics.velocity).x;
+            //Scale it down by some finetuned value each frame
+            physics.AddRelativeForce(-xV * tractionMultiplier, 0, 0, ForceMode.Acceleration);
 
-        //Debug impulse
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            x = Random.value - 0.5f;
-            z = Random.value - 0.5f;
-            Vector3 pos = new Vector3(x, 0, z);
-            physics.AddForceAtPosition(Vector3.up * 20, transform.TransformPoint(pos), ForceMode.Impulse);
+            if (boost >= 0.0f)
+            {
+
+            }
+
+            //Debug impulse
+            if(Input.GetKeyDown(KeyCode.Space))
+            {
+                x = Random.value - 0.5f;
+                z = Random.value - 0.5f;
+                Vector3 pos = new Vector3(x, 0, z);
+                physics.AddForceAtPosition(Vector3.up * 20, transform.TransformPoint(pos), ForceMode.Impulse);
+            }
         }
-      }
 	}
 
     private void Update()
@@ -191,6 +194,11 @@ public class Kart : MonoBehaviour {
                 GameObject tmp = (GameObject)Instantiate(ramen, transform.position, transform.rotation);
                 Targeted t = tmp.GetComponent<Targeted>();
                 t.Target = this.transform;
+            }
+
+            if(item.Equals("Boost"))
+            {
+                boost = 2.0f;
             }
         }
     }

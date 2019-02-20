@@ -27,6 +27,7 @@ public class Kart : MonoBehaviour {
     public float maxAngularVelocity;
 
     private string item;
+    private static string[] items = { "None", "Ramen", "Boost" };
     public GameObject ramen;
     private float boost;
     private float speedMultiplier;
@@ -37,7 +38,7 @@ public class Kart : MonoBehaviour {
 	void Start () {
         boost = 0.0f;
         speedMultiplier = 1.0f;
-        item = "Boost";
+        item = "None";
         physics = GetComponent<Rigidbody>();
         physics.centerOfMass = centerOfMass;
         physics.maxAngularVelocity = maxAngularVelocity;
@@ -127,7 +128,7 @@ public class Kart : MonoBehaviour {
             else if (Input.GetKey(KeyCode.S))
             {
                 float deceleration = acceleration;
-                if(transform.TransformVector(physics.velocity).z <= 0)
+                if(transform.InverseTransformVector(physics.velocity).z <= 0)
                     deceleration *= reversePenaltyMultiplier;
                 else
                     deceleration = brakeForce;
@@ -196,6 +197,7 @@ public class Kart : MonoBehaviour {
             {
                 GameObject tmp = (GameObject)Instantiate(ramen, transform.position, transform.rotation);
                 Targeted t = tmp.GetComponent<Targeted>();
+                //TODO: target opponent
                 t.Target = this.transform;
             }
 
@@ -205,6 +207,24 @@ public class Kart : MonoBehaviour {
                 boost = 2.0f;
                 Instantiate(boostParticles, transform);
             }
+            item = "None";
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Pickup" && item.Equals("None"))
+        {
+            item = items[Random.Range(1, 3)];
+            //visual/audio feedback
+        }
+        else if (other.tag == "Checkpoint") {}
+        //next checkpoint
+        else if(other.tag == "Ramen")
+        {
+            Destroy(other.gameObject);
+            speedMultiplier = 0.5f;
+            boost = 2.0f;
         }
     }
 }

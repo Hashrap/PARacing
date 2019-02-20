@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Pickup
   - Checkpoint
+  - Ramen
   layers:
   - Default
   - TransparentFX

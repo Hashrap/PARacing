@@ -30,6 +30,7 @@ public class Kart : MonoBehaviour {
     public GameObject ramen;
     private float boost;
     private float speedMultiplier;
+    public GameObject boostParticles;
 
 
 	// Use this for initialization
@@ -202,6 +203,7 @@ public class Kart : MonoBehaviour {
             {
                 speedMultiplier = 2.0f;
                 boost = 2.0f;
+                Instantiate(boostParticles, transform);
             }
         }
     }

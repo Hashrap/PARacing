@@ -27,14 +27,18 @@ public class Kart : MonoBehaviour {
     public float maxAngularVelocity;
 
     private string item;
+    private static string[] items = { "None", "Ramen", "Boost" };
     public GameObject ramen;
     private float boost;
+    private float speedMultiplier;
+    public GameObject boostParticles;
 
 
 	// Use this for initialization
 	void Start () {
         boost = 0.0f;
-        item = "Ramen";
+        speedMultiplier = 1.0f;
+        item = "None";
         physics = GetComponent<Rigidbody>();
         physics.centerOfMass = centerOfMass;
         physics.maxAngularVelocity = maxAngularVelocity;
@@ -113,7 +117,7 @@ public class Kart : MonoBehaviour {
             {
                 physics.AddForceAtPosition(
                     //Project the kart's forward (z+) vector onto the average ground plane
-                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration, avgNormal),
+                    Vector3.ProjectOnPlane(transform.TransformDirection(Vector3.forward) * acceleration * speedMultiplier, avgNormal),
                     //Force is applied slightly lower (y-) and moderately foreward (z+) of the center of volume
                     //This tilts the kart back and forth when accelerating and braking
                     transform.TransformPoint(accelerationPos),
@@ -124,7 +128,7 @@ public class Kart : MonoBehaviour {
             else if (Input.GetKey(KeyCode.S))
             {
                 float deceleration = acceleration;
-                if(transform.TransformVector(physics.velocity).z <= 0)
+                if(transform.InverseTransformVector(physics.velocity).z <= 0)
                     deceleration *= reversePenaltyMultiplier;
                 else
                     deceleration = brakeForce;
@@ -161,19 +165,14 @@ public class Kart : MonoBehaviour {
             //Scale it down by some finetuned value each frame
             physics.AddRelativeForce(-xV * tractionMultiplier, 0, 0, ForceMode.Acceleration);
 
-            if (boost >= 0.0f)
-            {
-
-            }
-
             //Debug impulse
-            if(Input.GetKeyDown(KeyCode.Space))
+            /*if(Input.GetKeyDown(KeyCode.Space))
             {
                 x = Random.value - 0.5f;
                 z = Random.value - 0.5f;
                 Vector3 pos = new Vector3(x, 0, z);
                 physics.AddForceAtPosition(Vector3.up * 20, transform.TransformPoint(pos), ForceMode.Impulse);
-            }
+            }*/
         }
 	}
 
@@ -187,19 +186,45 @@ public class Kart : MonoBehaviour {
         mainCam.transform.position = camPos;
         mainCam.transform.LookAt(transform.position);
 
+        if (boost >= 0.0f)
+            boost -= Time.deltaTime;
+        else
+            speedMultiplier = 1.0f;
+
         if(Input.GetKeyDown(KeyCode.F) && !item.Equals("None"))
         {
             if (item.Equals("Ramen"))
             {
                 GameObject tmp = (GameObject)Instantiate(ramen, transform.position, transform.rotation);
                 Targeted t = tmp.GetComponent<Targeted>();
+                //TODO: target opponent
                 t.Target = this.transform;
             }
 
             if(item.Equals("Boost"))
             {
+                speedMultiplier = 2.0f;
                 boost = 2.0f;
+                Instantiate(boostParticles, transform);
             }
+            item = "None";
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Pickup" && item.Equals("None"))
+        {
+            item = items[Random.Range(1, 3)];
+            //visual/audio feedback
+        }
+        else if (other.tag == "Checkpoint") {}
+        //next checkpoint
+        else if(other.tag == "Ramen")
+        {
+            Destroy(other.gameObject);
+            speedMultiplier = 0.5f;
+            boost = 2.0f;
         }
     }
 }
